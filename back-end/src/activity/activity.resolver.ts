@@ -11,13 +11,13 @@ import {
 } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { ActivityService } from './activity.service';
-import { AuthGuard } from 'src/auth/auth.guard';
-import { UserService } from 'src/user/user.service';
+import { AuthGuard } from '../auth/auth.guard';
+import { UserService } from '../user/user.service';
 import { Activity } from './activity.schema';
 
 import { CreateActivityInput } from './activity.inputs.dto';
-import { User } from 'src/user/user.schema';
-import { ContextWithJWTPayload } from 'src/auth/types/context';
+import { User } from '../user/user.schema';
+import { ContextWithJWTPayload } from '../auth/types/context';
 
 @Resolver(() => Activity)
 export class ActivityResolver {

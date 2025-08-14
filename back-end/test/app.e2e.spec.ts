@@ -1,13 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { randomUUID } from 'crypto';
-import { BaseAppModule } from './app.module';
+import { BaseAppModule } from '../src/app.module';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { TestModule, closeInMongodConnection } from './test/test.module';
+import { TestModule, closeInMongodConnection } from '../src/test/test.module';
 
 describe('App e2e', () => {
   let app: INestApplication;
-  beforeEach(async () => {
+  beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [TestModule, BaseAppModule],
     }).compile();
@@ -16,13 +16,11 @@ describe('App e2e', () => {
     await app.init();
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
     await app.close();
+    await closeInMongodConnection();
   });
 
-  afterAll(async () => {
-    closeInMongodConnection();
-  });
   it('app should be defined', () => {
     expect(app).toBeDefined();
   });
