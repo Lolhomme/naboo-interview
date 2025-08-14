@@ -1,8 +1,4 @@
-import {
-  HttpException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { User } from 'src/user/user.schema';
@@ -18,17 +14,21 @@ export class AuthService {
   ) {}
 
   async signIn({ email, password }: SignInInput): Promise<SignInDto> {
-    const user = await this.userService.getByEmail(email);
-    const isSamePassword = await bcrypt.compare(password, user.password);
+    try {
+      const user = await this.userService.getByEmail(email);
+      const isSamePassword = await bcrypt.compare(password, user.password);
 
-    if (!isSamePassword)
-      throw new HttpException('Wrong credentials provided', 400);
+      if (!isSamePassword) {
+        throw new UnauthorizedException('Invalid credentials');
+      }
 
-    const token = await this.generateToken({ user });
+      const token = await this.generateToken({ user });
 
-    await this.userService.updateToken(user.id, token);
-
-    return { access_token: token };
+      return { access_token: token };
+    } catch (error) {
+      // Don't leak information about whether user exists or not
+      throw new UnauthorizedException('Invalid credentials');
+    }
   }
 
   async generateToken({ user }: { user: User }): Promise<string> {
@@ -47,9 +47,11 @@ export class AuthService {
     firstName,
     lastName,
   }: SignUpInput): Promise<User> {
-    const user = await this.userService.findByEmail(email);
+    const existingUser = await this.userService.findByEmail(email);
 
-    if (user) throw new UnauthorizedException();
+    if (existingUser) {
+      throw new UnauthorizedException('Email already exists');
+    }
 
     return this.userService.createUser({
       email,

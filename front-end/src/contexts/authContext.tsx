@@ -51,23 +51,23 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [logout] = useMutation<LogoutMutation, LogoutMutationVariables>(Logout);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (!user && token) {
+    // Since we're using httpOnly cookies, we don't need to check localStorage
+    // Instead, we attempt to get user info directly from the server
+    if (!user) {
       getUser()
         .then((res) => setUser(res.data?.getMe || null))
+        .catch(() => setUser(null)) // User not authenticated
         .finally(() => setIsLoading(false));
     } else {
       setIsLoading(false);
     }
-  }, [user]);
+  }, [user, getUser]);
 
   const handleSignin = async (input: SignInInput) => {
     try {
       setIsLoading(true);
-      const response = await signin({ variables: { signInInput: input } });
-      const token = response.data?.login?.access_token || "";
-      localStorage.setItem("token", token);
+      await signin({ variables: { signInInput: input } });
+      // No need to manually handle token - it's set as httpOnly cookie by server
       await getUser().then((res) => setUser(res.data?.getMe || null));
       router.push("/profil");
     } catch (err) {
@@ -93,7 +93,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       setIsLoading(true);
       await logout();
-      localStorage.removeItem("token");
+      // No need to remove token from localStorage since we're using httpOnly cookies
       setUser(null);
       router.push("/");
     } catch (err) {

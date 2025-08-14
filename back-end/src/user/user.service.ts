@@ -37,17 +37,8 @@ export class UserService {
       role?: User['role'];
     },
   ): Promise<User> {
-    const hashedPassword = await bcrypt.hash(data.password, 10);
+    const hashedPassword = await bcrypt.hash(data.password, 12); // Increased salt rounds for better security
     const user = new this.userModel({ ...data, password: hashedPassword });
-    return user.save();
-  }
-
-  async updateToken(id: string, token: string): Promise<User> {
-    const user = await this.userModel.findById(id).exec();
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    user.token = token;
     return user.save();
   }
 
