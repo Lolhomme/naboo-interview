@@ -71,13 +71,15 @@ export class BaseAppModule {}
   imports: [
     BaseAppModule,
     MongooseModule.forRootAsync({
-      useFactory: () => {
-        if (!process.env.MONGO_URI) {
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const uri = configService.get<string>('MONGO_URI');
+        if (!uri) {
           throw new Error(
             'MONGO_URI is not defined in the environment variables',
           );
         }
-        return { uri: process.env.MONGO_URI };
+        return { uri };
       },
     }),
   ],
