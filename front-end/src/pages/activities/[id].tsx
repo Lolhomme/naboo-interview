@@ -1,3 +1,4 @@
+import React from "react";
 import { PageTitle } from "@/components";
 import { graphqlClient } from "@/graphql/apollo";
 import {
@@ -5,7 +6,11 @@ import {
   GetActivityQueryVariables,
 } from "@/graphql/generated/types";
 import GetActivity from "@/graphql/queries/activity/getActivity";
-import { Badge, Flex, Grid, Group, Image, Text } from "@mantine/core";
+import { Badge, Flex, Grid, Group, Image, Text, ActionIcon, Tooltip } from "@mantine/core";
+import { IconHeart, IconHeartFilled } from "@tabler/icons-react";
+import { useMutation } from "@apollo/client";
+import { ADD_FAVORITE_ACTIVITY, REMOVE_FAVORITE_ACTIVITY } from "@/graphql/mutations/activity/favoriteActivity";
+import { useAuth } from "@/hooks";
 import { GetServerSideProps } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -31,6 +36,35 @@ export const getServerSideProps: GetServerSideProps<
 
 export default function ActivityDetails({ activity }: ActivityDetailsProps) {
   const router = useRouter();
+  const { user } = useAuth();
+  const [addFavorite] = useMutation(ADD_FAVORITE_ACTIVITY);
+  const [removeFavorite] = useMutation(REMOVE_FAVORITE_ACTIVITY);
+  const [isFavorite, setIsFavorite] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+
+  React.useEffect(() => {
+    if (user && Array.isArray(user.favoriteActivityIds)) {
+      setIsFavorite(user.favoriteActivityIds.includes(activity.id));
+    } else {
+      setIsFavorite(false);
+    }
+  }, [user, activity.id]);
+
+  const handleToggleFavorite = async () => {
+    if (!user) return;
+    setLoading(true);
+    try {
+      if (isFavorite) {
+        await removeFavorite({ variables: { activityId: activity.id } });
+        setIsFavorite(false);
+      } else {
+        await addFavorite({ variables: { activityId: activity.id } });
+        setIsFavorite(true);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -57,6 +91,19 @@ export default function ActivityDetails({ activity }: ActivityDetailsProps) {
               <Badge color="yellow" variant="light">
                 {`${activity.price}€/j`}
               </Badge>
+              {user && (
+                <Tooltip label={isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}>
+                  <ActionIcon
+                    color={isFavorite ? "red" : "gray"}
+                    variant={isFavorite ? "filled" : "outline"}
+                    onClick={handleToggleFavorite}
+                    loading={loading}
+                    aria-label={isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
+                  >
+                    {isFavorite ? <IconHeartFilled /> : <IconHeart />}
+                  </ActionIcon>
+                </Tooltip>
+              )}
             </Group>
             <Text size="sm">{activity.description}</Text>
             <Text size="sm" color="dimmed">
