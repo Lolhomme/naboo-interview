@@ -124,8 +124,7 @@ export class UserService {
       .select('favoriteActivityIds')
       .exec();
     if (!user) throw new NotFoundException('User not found');
-    const ids: import('mongoose').Types.ObjectId[] =
-      user.favoriteActivityIds ?? [];
+    const ids = user.favoriteActivityIds ?? [];
     if (!ids.length) return [];
     const activities = await this.activityModel
       .find({ _id: { $in: ids } })

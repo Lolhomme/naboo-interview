@@ -1,19 +1,33 @@
-import { PageTitle } from "@/components";
+import { Activity, EmptyData, PageTitle } from "@/components";
 import { graphqlClient } from "@/graphql/apollo";
 import { withAuth } from "@/hocs";
 import { useAuth } from "@/hooks";
-import { Avatar, Flex, Text } from "@mantine/core";
+import { Avatar, Flex, Grid, Text } from "@mantine/core";
 import { GetServerSideProps } from "next";
 import Head from "next/head";
+import GetMyFavoriteActivities from "@/graphql/queries/activity/getMyFavoriteActivities";
+import { GetMyFavoriteActivitiesQuery, GetMyFavoriteActivitiesQueryVariables } from "@/graphql/generated/getMyFavoriteActivities";
 
 interface ProfileProps {
-  favoriteActivities: {
-    id: string;
-    name: string;
-  }[];
+  favoriteActivities: GetMyFavoriteActivitiesQuery["myFavoriteActivities"];
 }
 
-const Profile = (props: ProfileProps) => {
+export const getServerSideProps: GetServerSideProps<ProfileProps> = async ({ req }) => {
+  const response = await graphqlClient.query<
+    GetMyFavoriteActivitiesQuery,
+    GetMyFavoriteActivitiesQueryVariables
+  >({
+    query: GetMyFavoriteActivities,
+    context: { headers: { Cookie: req.headers.cookie } },
+  });
+  return {
+    props: {
+      favoriteActivities: response.data.myFavoriteActivities,
+    },
+  };
+};
+
+const Profile = ({ favoriteActivities }: ProfileProps) => {
   const { user } = useAuth();
 
   return (
@@ -33,6 +47,16 @@ const Profile = (props: ProfileProps) => {
           <Text>{user?.lastName}</Text>
         </Flex>
       </Flex>
+      <PageTitle title="Mes activités favorites" />
+      <Grid>
+        {favoriteActivities.length > 0 ? (
+          favoriteActivities.map((activity) => (
+            <Activity activity={activity} key={activity.id} />
+          ))
+        ) : (
+          <EmptyData />
+        )}
+      </Grid>
     </>
   );
 };
