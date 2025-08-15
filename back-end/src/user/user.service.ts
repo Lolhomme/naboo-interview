@@ -4,12 +4,13 @@ import { Model } from 'mongoose';
 import { SignUpInput } from 'src/auth/types';
 import { User } from './user.schema';
 import * as bcrypt from 'bcrypt';
+import { Activity } from '../activity/activity.schema';
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectModel(User.name)
-    private userModel: Model<User>,
+    @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(Activity.name) private activityModel: Model<Activity>,
   ) {}
 
   async getByEmail(email: string): Promise<User> {
@@ -73,5 +74,63 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
     return user;
+  }
+
+  async addFavoriteActivity(userId: string, activityId: string): Promise<User> {
+    const exists = await this.activityModel.exists({ _id: activityId });
+    if (!exists) throw new NotFoundException('Activity not found');
+
+    // Ensure activityId is a Types.ObjectId
+    const activityObjectId =
+      typeof activityId === 'string'
+        ? new this.activityModel.base.Types.ObjectId(activityId)
+        : activityId;
+
+    const user = await this.userModel
+      .findByIdAndUpdate(
+        userId,
+        { $addToSet: { favoriteActivityIds: activityObjectId } },
+        { new: true },
+      )
+      .exec();
+    if (!user) throw new NotFoundException('User not found');
+    return user;
+  }
+
+  async removeFavoriteActivity(
+    userId: string,
+    activityId: string,
+  ): Promise<User> {
+    // Ensure activityId is a Types.ObjectId
+    const activityObjectId =
+      typeof activityId === 'string'
+        ? new this.activityModel.base.Types.ObjectId(activityId)
+        : activityId;
+
+    const user = await this.userModel
+      .findByIdAndUpdate(
+        userId,
+        { $pull: { favoriteActivityIds: activityObjectId } },
+        { new: true },
+      )
+      .exec();
+    if (!user) throw new NotFoundException('User not found');
+    return user;
+  }
+
+  async getFavoriteActivities(userId: string): Promise<Activity[]> {
+    const user = await this.userModel
+      .findById(userId)
+      .select('favoriteActivityIds')
+      .exec();
+    if (!user) throw new NotFoundException('User not found');
+    const ids: import('mongoose').Types.ObjectId[] =
+      user.favoriteActivityIds ?? [];
+    if (!ids.length) return [];
+    const activities = await this.activityModel
+      .find({ _id: { $in: ids } })
+      .exec();
+
+    return activities;
   }
 }
