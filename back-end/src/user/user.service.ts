@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { SignUpInput } from 'src/auth/types';
 import { User } from './user.schema';
 import * as bcrypt from 'bcrypt';
@@ -124,12 +124,51 @@ export class UserService {
       .select('favoriteActivityIds')
       .exec();
     if (!user) throw new NotFoundException('User not found');
-    const ids = user.favoriteActivityIds ?? [];
+    const ids = (user.favoriteActivityIds ?? []).map((id) => id.toString());
     if (!ids.length) return [];
     const activities = await this.activityModel
       .find({ _id: { $in: ids } })
       .exec();
 
-    return activities;
+    // Reorder to match the user's favoriteActivityIds order
+    const byId = new Map(activities.map((a) => [a._id.toString(), a]));
+    const orderedActivities = ids
+      .map((id) => byId.get(id))
+      .filter(Boolean) as unknown as Activity[];
+
+    return orderedActivities;
+  }
+
+  async reorderFavoriteActivities(
+    userId: string,
+    newOrder: string[],
+  ): Promise<User> {
+    const user = await this.userModel
+      .findById(userId)
+      .select('favoriteActivityIds')
+      .exec();
+    if (!user) throw new NotFoundException('User not found');
+
+    const currentIds = user.favoriteActivityIds.map((id) => id.toString());
+    if (
+      newOrder.length !== currentIds.length ||
+      !newOrder.every((id) => currentIds.includes(id))
+    ) {
+      throw new Error(
+        'New order must contain all and only the current favorite activity ids',
+      );
+    }
+
+    // Ensure ObjectId typing and preserve exact order
+    const objectIds = newOrder.map((id) => new Types.ObjectId(id));
+    const updatedUser = await this.userModel
+      .findByIdAndUpdate(
+        userId,
+        { favoriteActivityIds: objectIds },
+        { new: true },
+      )
+      .exec();
+    if (!updatedUser) throw new NotFoundException('User not found');
+    return updatedUser;
   }
 }

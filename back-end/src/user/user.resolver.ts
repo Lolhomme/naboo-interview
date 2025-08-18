@@ -19,6 +19,18 @@ import { ContextWithJWTPayload } from '../auth/types/context';
 export class UserResolver {
   constructor(private readonly userService: UserService) {}
 
+  @Mutation(() => User)
+  @UseGuards(AuthGuard)
+  async reorderFavoriteActivities(
+    @Context() context: ContextWithJWTPayload,
+    @Args('activityIds', { type: () => [String] }) activityIds: string[],
+  ): Promise<User> {
+    return this.userService.reorderFavoriteActivities(
+      context.jwtPayload.id,
+      activityIds,
+    );
+  }
+
   @ResolveField(() => ID)
   id(@Parent() user: User): string {
     return user._id.toString();
