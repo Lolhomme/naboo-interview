@@ -43,6 +43,7 @@ export type Mutation = {
   logout: Scalars['Boolean']['output'];
   register: User;
   removeFavoriteActivity: User;
+  reorderFavoriteActivities: User;
 };
 
 
@@ -68,6 +69,11 @@ export type MutationRegisterArgs = {
 
 export type MutationRemoveFavoriteActivityArgs = {
   activityId: Scalars['String']['input'];
+};
+
+
+export type MutationReorderFavoriteActivitiesArgs = {
+  activityIds: Array<Scalars['String']['input']>;
 };
 
 export type Query = {
@@ -146,6 +152,13 @@ export type RemoveFavoriteActivityMutationVariables = Exact<{
 
 export type RemoveFavoriteActivityMutation = { __typename?: 'Mutation', removeFavoriteActivity: { __typename?: 'User', id: string, favoriteActivityIds: Array<string> } };
 
+export type ReorderFavoriteActivitiesMutationVariables = Exact<{
+  activityIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+
+export type ReorderFavoriteActivitiesMutation = { __typename?: 'Mutation', reorderFavoriteActivities: { __typename?: 'User', id: string, favoriteActivityIds: Array<string> } };
+
 export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -190,6 +203,11 @@ export type GetLatestActivitiesQueryVariables = Exact<{ [key: string]: never; }>
 
 
 export type GetLatestActivitiesQuery = { __typename?: 'Query', getLatestActivities: Array<{ __typename?: 'Activity', id: string, city: string, description: string, name: string, price: number, owner: { __typename?: 'User', firstName: string, lastName: string } }> };
+
+export type GetMyFavoriteActivitiesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetMyFavoriteActivitiesQuery = { __typename?: 'Query', myFavoriteActivities: Array<{ __typename?: 'Activity', id: string, city: string, description: string, name: string, price: number, owner: { __typename?: 'User', firstName: string, lastName: string } }> };
 
 export type GetUserActivitiesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -331,6 +349,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   logout?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   register?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationRegisterArgs, 'signUpInput'>>;
   removeFavoriteActivity?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationRemoveFavoriteActivityArgs, 'activityId'>>;
+  reorderFavoriteActivities?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationReorderFavoriteActivitiesArgs, 'activityIds'>>;
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {

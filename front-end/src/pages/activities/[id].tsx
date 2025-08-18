@@ -43,7 +43,7 @@ export default function ActivityDetails({ activity }: ActivityDetailsProps) {
   const [loading, setLoading] = React.useState(false);
 
   React.useEffect(() => {
-    if (user && Array.isArray(user.favoriteActivityIds)) {
+    if (user && user.favoriteActivityIds) {
       setIsFavorite(user.favoriteActivityIds.includes(activity.id));
     } else {
       setIsFavorite(false);

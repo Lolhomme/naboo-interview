@@ -5,13 +5,25 @@ import Link from "next/link";
 
 interface ActivityProps {
   activity: ActivityFragment;
+  dnd?: {
+    setNodeRef?: (node: HTMLElement | null) => void;
+    attributes?: Record<string, any>;
+    listeners?: Record<string, any>;
+    style?: React.CSSProperties;
+  };
 }
 
-export function Activity({ activity }: ActivityProps) {
+export function Activity({ activity, dnd }: ActivityProps) {
   const { classes } = useGlobalStyles();
 
   return (
-    <Grid.Col span={4}>
+    <Grid.Col
+      span={4}
+      ref={dnd?.setNodeRef as any}
+      style={dnd?.style}
+      {...(dnd?.attributes || {})}
+      {...(dnd?.listeners || {})}
+    >
       <Card shadow="sm" padding="lg" radius="md" withBorder>
         <Card.Section>
           <Image
