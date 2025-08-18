@@ -1,7 +1,9 @@
-import { ActivityFragment } from "@/graphql/generated/types";
+import { ActivityFragment, UserRole } from "@/graphql/generated/types";
 import { useGlobalStyles } from "@/utils";
 import { Badge, Button, Card, Grid, Group, Image, Text } from "@mantine/core";
 import Link from "next/link";
+import { useContext } from "react";
+import { AuthContext } from "../contexts";
 
 interface ActivityProps {
   activity: ActivityFragment;
@@ -15,6 +17,7 @@ interface ActivityProps {
 
 export function Activity({ activity, dnd }: ActivityProps) {
   const { classes } = useGlobalStyles();
+  const { user } = useContext(AuthContext);
 
   return (
     <Grid.Col
@@ -46,6 +49,11 @@ export function Activity({ activity, dnd }: ActivityProps) {
           <Badge color="yellow" variant="light">
             {`${activity.price}€/j`}
           </Badge>
+          {user?.role === UserRole.Admin && activity.createdAt && (
+            <Badge color="blue" variant="light">
+              {new Date(activity.createdAt).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}
+            </Badge>
+          )}
         </Group>
 
         <Text size="sm" color="dimmed" className={classes.ellipsis}>
