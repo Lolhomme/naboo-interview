@@ -12,19 +12,17 @@ import {
 import { UseGuards } from '@nestjs/common';
 import { ActivityService } from './activity.service';
 import { AuthGuard } from '../auth/auth.guard';
-import { UserService } from '../user/user.service';
 import { Activity } from './activity.schema';
 
 import { CreateActivityInput } from './activity.inputs.dto';
 import { User } from '../user/user.schema';
 import { ContextWithJWTPayload } from '../auth/types/context';
+import { CurrentUser } from '../auth/current-user.decorator';
+import { UserRole } from '../user/user.schema';
 
 @Resolver(() => Activity)
 export class ActivityResolver {
-  constructor(
-    private readonly activityService: ActivityService,
-    private readonly userServices: UserService,
-  ) {}
+  constructor(private readonly activityService: ActivityService) {}
 
   @ResolveField(() => ID)
   id(@Parent() activity: Activity): string {
@@ -35,6 +33,16 @@ export class ActivityResolver {
   async owner(@Parent() activity: Activity): Promise<User> {
     await activity.populate('owner');
     return activity.owner;
+  }
+
+  @ResolveField(() => Date, { nullable: true })
+  createdAt(
+    @Parent() activity: Activity,
+    @Context() context: ContextWithJWTPayload,
+  ): Date | null {
+    return context?.jwtPayload?.role === UserRole.ADMIN
+      ? activity.createdAt || null
+      : null;
   }
 
   @Query(() => [Activity])
@@ -50,9 +58,9 @@ export class ActivityResolver {
   @Query(() => [Activity])
   @UseGuards(AuthGuard)
   async getActivitiesByUser(
-    @Context() context: ContextWithJWTPayload,
+    @CurrentUser() user: { id: string },
   ): Promise<Activity[]> {
-    return this.activityService.findByUser(context.jwtPayload.id);
+    return this.activityService.findByUser(user.id);
   }
 
   @Query(() => [String])
@@ -78,9 +86,9 @@ export class ActivityResolver {
   @Mutation(() => Activity)
   @UseGuards(AuthGuard)
   async createActivity(
-    @Context() context: ContextWithJWTPayload,
+    @CurrentUser() user: { id: string },
     @Args('createActivityInput') createActivity: CreateActivityInput,
   ): Promise<Activity> {
-    return this.activityService.create(context.jwtPayload.id, createActivity);
+    return this.activityService.create(user.id, createActivity);
   }
 }

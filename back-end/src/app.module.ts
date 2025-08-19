@@ -43,7 +43,7 @@ import { PayloadDto } from './auth/types/jwtPayload.dto';
                   secret,
                 })) as PayloadDto;
               } catch (error) {
-                throw new UnauthorizedException(error);
+                jwtPayload = null;
               }
             }
 

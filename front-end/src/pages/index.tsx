@@ -1,5 +1,5 @@
 import { Activity, PageTitle } from "@/components";
-import { graphqlClient } from "@/graphql/apollo";
+import { createApolloClient } from "@/graphql/apollo";
 import { useGlobalStyles } from "@/utils";
 import { Button, Flex, Grid, Text } from "@mantine/core";
 import { GetServerSideProps } from "next";
@@ -15,8 +15,9 @@ interface HomeProps {
   activities: GetLatestActivitiesQuery["getLatestActivities"];
 }
 
-export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
-  const response = await graphqlClient.query<
+export const getServerSideProps: GetServerSideProps<HomeProps> = async ({ req }) => {
+  const client = createApolloClient({ headers: { cookie: req.headers.cookie || "" } });
+  const response = await client.query<
     GetLatestActivitiesQuery,
     GetLatestActivitiesQueryVariables
   >({

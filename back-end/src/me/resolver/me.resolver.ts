@@ -1,9 +1,9 @@
-import { Context, Query, Resolver } from '@nestjs/graphql';
+import { Query, Resolver } from '@nestjs/graphql';
 import { UserService } from '../../user/user.service';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../../auth/auth.guard';
 import { User } from '../../user/user.schema';
-import { ContextWithJWTPayload } from '../../auth/types/context';
+import { CurrentUser } from '../../auth/current-user.decorator';
 
 @Resolver('Me')
 export class MeResolver {
@@ -11,9 +11,7 @@ export class MeResolver {
 
   @Query(() => User)
   @UseGuards(AuthGuard)
-  async getMe(@Context() context: ContextWithJWTPayload): Promise<User> {
-    // the AuthGard will add the user to the context
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return this.userService.getById(context.jwtPayload.id);
+  async getMe(@CurrentUser() user: { id: string }): Promise<User> {
+    return this.userService.getById(user.id);
   }
 }

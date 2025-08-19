@@ -1,5 +1,5 @@
 import { Activity, EmptyData, PageTitle } from "@/components";
-import { graphqlClient } from "@/graphql/apollo";
+import { createApolloClient } from "@/graphql/apollo";
 import {
   GetActivitiesQuery,
   GetActivitiesQueryVariables,
@@ -7,6 +7,7 @@ import {
 import GetActivities from "@/graphql/queries/activity/getActivities";
 import { useAuth } from "@/hooks";
 import { Button, Grid, Group } from "@mantine/core";
+import { useQuery } from "@apollo/client";
 import { GetServerSideProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
@@ -17,8 +18,9 @@ interface DiscoverProps {
 
 export const getServerSideProps: GetServerSideProps<
   DiscoverProps
-> = async () => {
-  const response = await graphqlClient.query<
+> = async ({ req }) => {
+  const client = createApolloClient({ headers: { cookie: req.headers.cookie || "" } });
+  const response = await client.query<
     GetActivitiesQuery,
     GetActivitiesQueryVariables
   >({
@@ -29,6 +31,11 @@ export const getServerSideProps: GetServerSideProps<
 
 export default function Discover({ activities }: DiscoverProps) {
   const { user } = useAuth();
+  // Client-side fetch ensures requests include JWT header from localStorage
+  const { data } = useQuery<GetActivitiesQuery, GetActivitiesQueryVariables>(GetActivities, {
+    fetchPolicy: "network-only",
+  });
+  const list = data?.getActivities ?? activities;
 
   return (
     <>
@@ -44,8 +51,8 @@ export default function Discover({ activities }: DiscoverProps) {
         )}
       </Group>
       <Grid>
-        {activities.length > 0 ? (
-          activities.map((activity) => (
+        {list.length > 0 ? (
+          list.map((activity) => (
             <Activity activity={activity} key={activity.id} />
           ))
         ) : (

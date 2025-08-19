@@ -2,7 +2,6 @@ import {
   Resolver,
   Mutation,
   Args,
-  Context,
   Query,
   ResolveField,
   Parent,
@@ -13,7 +12,7 @@ import { AuthGuard } from '../auth/auth.guard';
 import { User } from './user.schema';
 import { UserService } from './user.service';
 import { Activity } from '../activity/activity.schema';
-import { ContextWithJWTPayload } from '../auth/types/context';
+import { CurrentUser } from '../auth/current-user.decorator';
 
 @Resolver(() => User)
 export class UserResolver {
@@ -22,13 +21,10 @@ export class UserResolver {
   @Mutation(() => User)
   @UseGuards(AuthGuard)
   async reorderFavoriteActivities(
-    @Context() context: ContextWithJWTPayload,
+    @CurrentUser() user: { id: string },
     @Args('activityIds', { type: () => [String] }) activityIds: string[],
   ): Promise<User> {
-    return this.userService.reorderFavoriteActivities(
-      context.jwtPayload.id,
-      activityIds,
-    );
+    return this.userService.reorderFavoriteActivities(user.id, activityIds);
   }
 
   @ResolveField(() => ID)
@@ -39,32 +35,26 @@ export class UserResolver {
   @Query(() => [Activity])
   @UseGuards(AuthGuard)
   async myFavoriteActivities(
-    @Context() context: ContextWithJWTPayload,
+    @CurrentUser() user: { id: string },
   ): Promise<Activity[]> {
-    return this.userService.getFavoriteActivities(context.jwtPayload.id);
+    return this.userService.getFavoriteActivities(user.id);
   }
 
   @Mutation(() => User)
   @UseGuards(AuthGuard)
   async addFavoriteActivity(
-    @Context() context: ContextWithJWTPayload,
+    @CurrentUser() user: { id: string },
     @Args('activityId') activityId: string,
   ): Promise<User> {
-    return this.userService.addFavoriteActivity(
-      context.jwtPayload.id,
-      activityId,
-    );
+    return this.userService.addFavoriteActivity(user.id, activityId);
   }
 
   @Mutation(() => User)
   @UseGuards(AuthGuard)
   async removeFavoriteActivity(
-    @Context() context: ContextWithJWTPayload,
+    @CurrentUser() user: { id: string },
     @Args('activityId') activityId: string,
   ): Promise<User> {
-    return this.userService.removeFavoriteActivity(
-      context.jwtPayload.id,
-      activityId,
-    );
+    return this.userService.removeFavoriteActivity(user.id, activityId);
   }
 }
