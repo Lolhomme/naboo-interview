@@ -115,5 +115,16 @@ npm run generate-types
 
 ## Connection informations
 
-email: <user1@test.fr>
-password: user1
+Demo accounts (seeded automatically):
+
+- User:
+  - Email: `user1@test.fr`
+  - Password: `user1`
+  - Name: John Doe
+- Admin:
+  - Email: `admin@test.fr`
+  - Password: `admin`
+  - Name: Admin Boss
+  - Role: admin
+
+Use these credentials to sign in on the frontend at `/signin`.
