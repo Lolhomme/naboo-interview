@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { SignUpInput } from 'src/auth/types';
@@ -154,7 +158,7 @@ export class UserService {
       newOrder.length !== currentIds.length ||
       !newOrder.every((id) => currentIds.includes(id))
     ) {
-      throw new Error(
+      throw new BadRequestException(
         'New order must contain all and only the current favorite activity ids',
       );
     }

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, InternalServerErrorException } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ActivityModule } from './activity/activity.module';
@@ -75,7 +75,7 @@ export class BaseAppModule {}
       useFactory: (configService: ConfigService) => {
         const uri = configService.get<string>('MONGO_URI');
         if (!uri) {
-          throw new Error(
+          throw new InternalServerErrorException(
             'MONGO_URI is not defined in the environment variables',
           );
         }

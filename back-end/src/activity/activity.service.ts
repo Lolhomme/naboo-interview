@@ -28,7 +28,9 @@ export class ActivityService {
 
   async findOne(id: string): Promise<Activity> {
     const activity = await this.activityModel.findById(id).exec();
-    if (!activity) throw new NotFoundException();
+    if (!activity) {
+      throw new NotFoundException('Activity not found');
+    }
     return activity;
   }
 
