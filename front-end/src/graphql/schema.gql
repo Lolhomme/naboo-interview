@@ -4,7 +4,6 @@
 
 type Activity {
   city: String!
-  createdAt: DateTime
   debug: ActivityDebug
   description: String!
   id: ID!
@@ -72,7 +71,6 @@ type User {
   firstName: String!
   id: ID!
   lastName: String!
-  password: String!
   role: UserRole!
 }
 

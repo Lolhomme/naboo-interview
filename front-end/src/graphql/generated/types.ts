@@ -20,7 +20,6 @@ export type Scalars = {
 export type Activity = {
   __typename?: 'Activity';
   city: Scalars['String']['output'];
-  createdAt?: Maybe<Scalars['DateTime']['output']>;
   debug?: Maybe<ActivityDebug>;
   description: Scalars['String']['output'];
   id: Scalars['ID']['output'];
@@ -130,7 +129,6 @@ export type User = {
   firstName: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   lastName: Scalars['String']['output'];
-  password: Scalars['String']['output'];
   role: UserRole;
 };
 
@@ -344,7 +342,6 @@ export type ResolversParentTypes = {
 
 export type ActivityResolvers<ContextType = any, ParentType extends ResolversParentTypes['Activity'] = ResolversParentTypes['Activity']> = {
   city?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  createdAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   debug?: Resolver<Maybe<ResolversTypes['ActivityDebug']>, ParentType, ContextType>;
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -395,7 +392,6 @@ export type UserResolvers<ContextType = any, ParentType extends ResolversParentT
   firstName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   lastName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  password?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   role?: Resolver<ResolversTypes['UserRole'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };

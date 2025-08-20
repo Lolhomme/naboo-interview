@@ -71,7 +71,6 @@ type User {
   firstName: String!
   id: ID!
   lastName: String!
-  password: String!
   role: UserRole!
 }
 
