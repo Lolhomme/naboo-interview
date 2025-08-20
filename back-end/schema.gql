@@ -5,11 +5,16 @@
 type Activity {
   city: String!
   createdAt: DateTime
+  debug: ActivityDebug
   description: String!
   id: ID!
   name: String!
   owner: User!
   price: Int!
+}
+
+type ActivityDebug {
+  createdAt: DateTime
 }
 
 input CreateActivityInput {

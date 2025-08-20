@@ -35,6 +35,16 @@ export class Activity extends Document {
 
   @Field(() => Date, { nullable: true })
   createdAt!: Date;
+
+  // Admin-only debug view (resolved in resolver)
+  @Field(() => ActivityDebug, { nullable: true })
+  debug?: ActivityDebug | null;
 }
 
 export const ActivitySchema = SchemaFactory.createForClass(Activity);
+
+@ObjectType()
+export class ActivityDebug {
+  @Field(() => Date, { nullable: true })
+  createdAt?: Date | null;
+}

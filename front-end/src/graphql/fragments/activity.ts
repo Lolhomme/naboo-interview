@@ -8,7 +8,9 @@ const ActivityFragment = gql`
     description
     name
     price
-    createdAt
+    debug {
+      createdAt
+    }
     owner {
       ...Owner
     }

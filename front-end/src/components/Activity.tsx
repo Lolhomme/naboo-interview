@@ -49,9 +49,9 @@ export function Activity({ activity, dnd }: ActivityProps) {
           <Badge color="yellow" variant="light">
             {`${activity.price}€/j`}
           </Badge>
-          {activity.createdAt && (
+          {activity.debug?.createdAt && (
             <Badge color="blue" variant="light">
-              {new Date(activity.createdAt).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}
+              {new Date(activity.debug!.createdAt).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}
             </Badge>
           )}
         </Group>

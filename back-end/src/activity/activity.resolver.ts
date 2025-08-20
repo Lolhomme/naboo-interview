@@ -12,11 +12,10 @@ import {
 import { UseGuards } from '@nestjs/common';
 import { ActivityService } from './activity.service';
 import { AuthGuard } from '../auth/auth.guard';
-import { Activity } from './activity.schema';
+import { Activity, ActivityDebug } from './activity.schema';
 
 import { CreateActivityInput } from './activity.inputs.dto';
 import { User } from '../user/user.schema';
-import { ContextWithJWTPayload } from '../auth/types/context';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { UserRole } from '../user/user.schema';
 
@@ -36,13 +35,17 @@ export class ActivityResolver {
   }
 
   @ResolveField(() => Date, { nullable: true })
-  createdAt(
+  createdAt(@Parent() activity: Activity): Date | null {
+    return activity.createdAt || null;
+  }
+
+  @ResolveField(() => ActivityDebug, { nullable: true })
+  debug(
     @Parent() activity: Activity,
-    @Context() context: ContextWithJWTPayload,
-  ): Date | null {
-    return context?.jwtPayload?.role === UserRole.ADMIN
-      ? activity.createdAt || null
-      : null;
+    @Context() context: { jwtPayload?: { role?: UserRole } | null },
+  ): ActivityDebug | null {
+    if (context?.jwtPayload?.role !== UserRole.ADMIN) return null;
+    return { createdAt: activity.createdAt ?? null };
   }
 
   @Query(() => [Activity])
