@@ -4,7 +4,6 @@
 
 type Activity {
   city: String!
-  createdAt: DateTime
   debug: ActivityDebug
   description: String!
   id: ID!

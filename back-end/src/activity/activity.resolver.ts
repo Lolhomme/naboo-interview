@@ -34,11 +34,6 @@ export class ActivityResolver {
     return activity.owner;
   }
 
-  @ResolveField(() => Date, { nullable: true })
-  createdAt(@Parent() activity: Activity): Date | null {
-    return activity.createdAt || null;
-  }
-
   @ResolveField(() => ActivityDebug, { nullable: true })
   debug(
     @Parent() activity: Activity,
